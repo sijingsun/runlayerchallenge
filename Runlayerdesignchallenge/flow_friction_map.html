@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Runlayer — User Flow & Friction Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Runlayer Design Tokens ── */
+    :root {
+      --background:           #f4f4f5;
+      --card:                 #ffffff;
+      --foreground:           #09090b;
+      --muted:                #f4f4f5;
+      --muted-foreground:     #71717a;
+      --border:               #e4e4e7;
+      --primary:              #18181b;
+      --primary-foreground:   #fafafa;
+      --destructive:          #ef4444;
+      --warning:              #f59e0b;
+      --success:              #22c55e;
+      --info:                 #3b82f6;
+      --radius:               8px;
+      --shadow-sm:            0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md:            0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      background: var(--background);
+      color: var(--foreground);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 40px 32px;
+      min-width: 900px;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .page-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--muted-foreground);
+    }
+
+    /* ── Flow Card ── */
+    .flow-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+      overflow: visible;
+    }
+
+    .flow-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+    }
+    .flow-tag {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .flow-title-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--foreground);
+    }
+
+    /* ── Swimlane ── */
+    .swimlane { width: 100%; overflow: visible; }
+
+    .lane {
+      display: flex;
+      align-items: stretch;
+      min-height: 80px;
+      overflow: visible;
+    }
+    .lane + .lane { border-top: 1px solid var(--border); }
+
+    .lane-label {
+      width: 88px;
+      min-width: 88px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 8px;
+      gap: 2px;
+      background: var(--muted);
+    }
+    .lane-label .persona { font-size: 10px; font-weight: 600; color: var(--foreground); }
+    .lane-label .role    { font-size: 10px; color: var(--muted-foreground); }
+    .lane-label .dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .jane .dot  { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .admin .dot { background: #fff7ed; border: 1px solid #fed7aa; }
+
+    /* ── Steps Row ── */
+    .lane-steps {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 6px;
+      flex: 1;
+      overflow: visible;
+    }
+
+    /* ── Step ── */
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step:hover { z-index: 100; }
+
+    .step-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      padding: 8px 10px;
+      font-size: 11px;
+      line-height: 1.4;
+      text-align: center;
+      width: 108px;
+      color: var(--foreground);
+      box-shadow: var(--shadow-sm);
+    }
+    .step-box.flagged {
+      border-color: #fca5a5;
+      background: #fff5f5;
+    }
+    .step-box .step-label {
+      font-weight: 500;
+      font-size: 11px;
+    }
+    .step-box .step-sub {
+      font-size: 10px;
+      color: var(--muted-foreground);
+      margin-top: 1px;
+    }
+
+    /* ── Connector Arrow ── */
+    .arrow {
+      color: #d4d4d8;
+      font-size: 12px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    /* ── Friction Badges ── */
+    .friction-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: center;
+      min-height: 18px;
+    }
+
+    .fb {
+      position: relative;
+      width: 17px; height: 17px;
+      border-radius: 50%;
+      background: var(--destructive);
+      color: #fff;
+      font-size: 8px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      flex-shrink: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    .fb.global  { background: var(--muted-foreground); }
+    .fb.repeat  { background: #a1a1aa; } /* same friction as Flow 1 — de-emphasized */
+
+    /* Tooltip — dark default, appears below badge */
+    .fb .tip {
+      display: none;
+      position: absolute;
+      top: calc(100% + 7px);
+      left: 0;
+      transform: none;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 10px;
+      line-height: 1.5;
+      width: 220px;
+      z-index: 200;
+      white-space: normal;
+      text-align: left;
+      pointer-events: none;
+      font-weight: 400;
+      box-shadow: var(--shadow-md);
+    }
+    .fb .tip::before {
+      content: '';
+      position: absolute;
+      bottom: 100%; left: 6px;
+      border: 5px solid transparent;
+      border-bottom-color: var(--primary);
+    }
+    .fb:hover .tip { display: block; }
+
+    /* White structured tooltip — for F11, F12 */
+    .fb .tip.white {
+      background: var(--card);
+      color: var(--foreground);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      width: 240px;
+      padding: 0;
+      overflow: hidden;
+    }
+    .fb .tip.white::before {
+      border-bottom-color: var(--border);
+    }
+    .tip.white .tip-section {
+      padding: 8px 11px;
+    }
+    .tip.white .tip-section + .tip-section {
+      border-top: 1px solid var(--border);
+    }
+    .tip.white .tip-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted-foreground);
+      margin-bottom: 3px;
+    }
+    .tip.white .tip-body {
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--foreground);
+    }
+    .fb .tip strong {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+      font-size: 10px;
+    }
+
+    /* ── Handoff Divider ── */
+    .handoff-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      background: #fafaf9;
+      border-top: 1px dashed var(--border);
+      border-bottom: 1px dashed var(--border);
+      color: var(--muted-foreground);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .handoff-row .hline {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .handoff-row .hicon {
+      font-size: 11px;
+      color: #a1a1aa;
+    }
+
+    /* ── Legend ── */
+    .legend-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+    }
+    .legend-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-foreground);
+      margin-bottom: 14px;
+    }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 32px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--foreground);
+    }
+    .legend-item .fb { margin-top: 1px; flex-shrink: 0; }
+    .legend-item .ltext strong {
+      font-weight: 600;
+      display: block;
+      font-size: 11px;
+    }
+    .legend-item .ltext span {
+      color: var(--muted-foreground);
+      font-size: 10px;
+    }
+
+    /* ── Section divider between flows ── */
+    .section-note {
+      font-size: 11px;
+      color: var(--muted-foreground);
+      margin: -16px 0 24px 0;
+      padding-left: 2px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1>User Flow &amp; Friction Map</h1>
+    <p>Runlayer — Design Challenge · Current state analysis</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       FLOW 1: EXISTING CONNECTOR
+  ══════════════════════════════════════════ -->
+  <div class="flow-card">
+    <div class="flow-header">
+      <span class="flow-tag">Flow 1</span>
+      <span class="flow-title-text">Requesting Access to an Existing Connector</span>
+    </div>
+
+    <div class="swimlane">
+
+      <!-- Jane lane -->
+      <div class="lane jane">
+        <div class="lane-label">
+          <div class="dot">👩‍💻</div>
+          <span class="persona">Jane</span>
+          <span class="role">Non-Admin</span>
+        </div>
+        <div class="lane-steps">
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Browse catalog</div>
+              <div class="step-sub">find Linear #2</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">12<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">"Linear #2" is meaningless to Jane. She can't tell which version fits her use case without already knowing how each was configured.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Encourage descriptive naming at setup — hint text or LLM-suggested names like "Linear · Read only · Designers" — so catalog items are self-explanatory.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Click "Request access"</div>
+              <div class="step-sub">fill reason (free text)</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">11<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">Which AI client(s) Jane is requesting for is buried in her free-text reason. The admin must read a paragraph to understand scope — "approving Linear #2 for ChatGPT" vs. "for all clients" are different decisions.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Add an explicit AI client multi-select to the request form. The admin then sees "Requested for: ChatGPT · Cursor" as a structured field — not inferred from prose.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Submit → Pending</div>
+              <div class="step-sub">waiting on admin</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">3<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">After submitting, Jane has no in-product way to see status, who is reviewing, or when to expect a response.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">A "My requests" section within "My connectors" showing state per request — submitted, under review, approved, denied — with timestamps.</div></div>
+              </div></div>
+              <div class="fb">4<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">Jane is only notified of the outcome via email. No in-product notification channel exists for either role.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Unified in-product inbox handling both workflow events (your request was approved) and status updates. Workflow events need embedded action UI; status updates need context and acknowledgment.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Notified of decision</div>
+              <div class="step-sub">via email</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Uses Linear in AI client</div>
+              <div class="step-sub">Runlayer invisible</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Handoff -->
+      <div class="handoff-row">
+        <div class="hline"></div>
+        <span class="hicon">↕</span>
+        <span>Request handoff to admin</span>
+        <div class="hline"></div>
+      </div>
+
+      <!-- Admin lane -->
+      <div class="lane admin">
+        <div class="lane-label">
+          <div class="dot">🔐</div>
+          <span class="persona">Admin</span>
+          <span class="role">Gusto IT</span>
+        </div>
+        <div class="lane-steps">
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Discover request</div>
+              <div class="step-sub">in queue</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">1<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">With "Requests" nav removed, there is no persistent signal that a request is waiting. Admin may miss it entirely.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Persistent notification badge on the renamed admin entry point (e.g., "Admin" not "Settings") showing pending request count — visible from anywhere in the product.</div></div>
+              </div></div>
+              <div class="fb">2<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">Queue is a flat list — every request looks identical. No basis for triage.</div></div>
+                <div class="tip-section"><div class="tip-label">3 signals to add to each card</div><div class="tip-body"><strong>① Priority flag</strong> — Jane marks "High priority" at submit. Shows as ! badge top-right of card.<br><br><strong>② Wait time</strong> — elapsed time since submission. "3 days" grows naturally.<br><br><strong>③ Risk level</strong> — High (risky tools + no org precedent) or Low (existing approvals + few risky tools). Combo of both factors.</div></div>
+              </div></div>
+              <div class="fb">6<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">Same connector requested repeatedly by different people. Admin reviews the same decision over and over instead of making a group-level policy once.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Pattern-triggered prompt: "8 people requested Linear #2 this month — consider granting it to the Engineering group." Also: Step 2 of the grant modal surfaces similar waiting users to batch-approve in one action.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Open request modal</div>
+              <div class="step-sub">"Connector access request"</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Review Overview tab</div>
+              <div class="step-sub">no security summary</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">9<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">Flow 1 Overview shows no security summary — risk is only a "3" badge on a tab, easy to miss. Flow 2 shows a security summary inline. Same admin, same decision weight, different information.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Elevate security summary into the Overview for both flows equally. One clear signal, same position, same format — linked directly to risk detail without requiring tab navigation.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Click "Grant access"</div>
+              <div class="step-sub">more steps follow</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">5<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">"Grant access" reads as a terminal action. Admin clicks it expecting to be done — a configuration modal appears unexpectedly. The two steps are correct; the button label isn't.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body"><strong>"Approve & configure →"</strong> or <strong>"Continue to access setup →"</strong> — both signal more is coming. Step 2 modal opens with "Configure access for Jane Cooper" to orient the admin.<br><br>Step 2 is also a good place to suggest: <em>"Priya and Marcus are also waiting for Linear #2 — add them here?"</em></div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">36-tool checklist</div>
+              <div class="step-sub">permission config</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">7<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">Every approval forces the admin to face a 36-tool checklist regardless of intent. Most admins want one-click approve with the connector version's default profile.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">One-click approve with the default toolset as the primary action. "Customize access" is a secondary expansion — available but not forced. Fast approvals stay fast.</div></div>
+              </div></div>
+              <div class="fb">11<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">The permission config modal doesn't show which AI clients this approval will apply to. The admin can't confirm or adjust client scope at the point of approval.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Surface Jane's selected AI clients prominently in the approval modal — "Requested for: ChatGPT · Cursor" — so the admin can approve as-is or narrow the scope before confirming.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Approval complete</div>
+              <div class="step-sub">Jane notified by email</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       FLOW 2: NEW CONNECTOR REQUEST
+  ══════════════════════════════════════════ -->
+  <div class="flow-card">
+    <div class="flow-header">
+      <span class="flow-tag">Flow 2</span>
+      <span class="flow-title-text">Requesting a New / Custom Connector</span>
+    </div>
+
+    <div class="swimlane">
+
+      <!-- Jane lane -->
+      <div class="lane jane">
+        <div class="lane-label">
+          <div class="dot">👩‍💻</div>
+          <span class="persona">Jane</span>
+          <span class="role">Non-Admin</span>
+        </div>
+        <div class="lane-steps">
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Browse catalog</div>
+              <div class="step-sub">connector not found</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Click "Request Connector"</div>
+              <div class="step-sub">custom path</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Fill form</div>
+              <div class="step-sub">name, description, transport, registration</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Submit → Pending</div>
+              <div class="step-sub">waiting on admin</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb repeat">3<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Repeated from Flow 1</div><div class="tip-body">Same friction — Jane has no in-product visibility into request status after submitting.</div></div>
+              </div></div>
+              <div class="fb repeat">4<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Repeated from Flow 1</div><div class="tip-body">Same friction — outcome communicated only via email. No in-product channel for either flow.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Notified of decision</div>
+              <div class="step-sub">via email</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Connector in catalog</div>
+              <div class="step-sub">access granted</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Handoff -->
+      <div class="handoff-row">
+        <div class="hline"></div>
+        <span class="hicon">↕</span>
+        <span>Request handoff to admin</span>
+        <div class="hline"></div>
+      </div>
+
+      <!-- Admin lane -->
+      <div class="lane admin">
+        <div class="lane-label">
+          <div class="dot">🔐</div>
+          <span class="persona">Admin</span>
+          <span class="role">Gusto IT</span>
+        </div>
+        <div class="lane-steps">
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Discover request</div>
+              <div class="step-sub">in queue</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb repeat">1<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Repeated from Flow 1</div><div class="tip-body">Same friction — no persistent signal that a new connector request is waiting.</div></div>
+              </div></div>
+              <div class="fb repeat">2<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">New connector requests (unvetted, higher risk) sit beside routine access requests with no distinction.</div></div>
+                <div class="tip-section"><div class="tip-label">3 signals to add to each card</div><div class="tip-body"><strong>① Priority flag</strong> — Jane marks "High priority" at submit. Shows as ! badge top-right of card.<br><br><strong>② Wait time</strong> — elapsed time since submission.<br><br><strong>③ Risk level</strong> — High (risky tools + no org precedent) or Low (existing approvals + few risky tools).</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Open request modal</div>
+              <div class="step-sub">"New connector request"</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Review Overview</div>
+              <div class="step-sub">security summary shown</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">9<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">This modal shows a security summary inline ("3 high risk tools"). Flow 1 does not. Same admin, same decision weight, different information — creates inconsistency.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Standardise: security summary in Overview for both flows. Same position, same format, same level of detail.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Tools tab</div>
+              <div class="step-sub">risk banner appears again</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">9<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">"3 high risk tools" appears in the Overview, then again as a banner in the Tools tab — admin sees the count twice before ever reaching the actual risk detail. Cross-tab navigation required.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Collapse into one signal in the Overview, linked directly to risk detail inline — no tab switching needed.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Decide</div>
+              <div class="step-sub">Reject / Grant existing / Create new</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">5<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">"Grant access to existing" sounds even more final than "Grant access" — "existing" implies everything is already set up. Same misleading label problem as Flow 1.</div></div>
+                <div class="tip-section"><div class="tip-label">Potential idea</div><div class="tip-body">Same fix applies — <strong>"Approve & configure →"</strong> or <strong>"Continue to access setup →"</strong> — so the admin knows configuration follows before they click.</div></div>
+              </div></div>
+              <div class="fb repeat">11<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Repeated from Flow 1</div><div class="tip-body">Same friction — which AI clients this applies to is still not surfaced at the approval step.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box flagged">
+              <div class="step-label">Configure connector + permissions</div>
+            </div>
+            <div class="friction-row">
+              <div class="fb">7<div class="tip white">
+                <div class="tip-section"><div class="tip-label">Friction observed</div><div class="tip-body">When creating a new connector, admin configures permissions from scratch — no suggested defaults exist for a brand new connector type.</div></div>
+                <div class="tip-section"><div class="tip-label">To discuss</div><div class="tip-body">Solution not yet defined — need to align on what "sensible defaults" look like for a new connector with no prior org history.</div></div>
+              </div></div>
+            </div>
+          </div>
+
+          <div class="arrow">→</div>
+
+          <div class="step">
+            <div class="step-box">
+              <div class="step-label">Connector live</div>
+              <div class="step-sub">approval complete</div>
+            </div>
+            <div class="friction-row"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       LEGEND
+  ══════════════════════════════════════════ -->
+  <div class="legend-card">
+    <div style="display:flex; gap:16px; margin-bottom:14px; align-items:center;">
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--foreground);">
+        <div class="fb" style="pointer-events:none;">1</div> Unique to this flow
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--foreground);">
+        <div class="fb repeat" style="pointer-events:none;">1</div> Repeated from Flow 1
+      </div>
+    </div>
+    <div class="legend-title">Friction Reference</div>
+    <div class="legend-grid">
+
+      <div class="legend-item">
+        <div class="fb">1</div>
+        <div class="ltext">
+          <strong>Admin awareness gap</strong>
+          <span>No persistent signal when requests arrive after nav removal</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">2</div>
+        <div class="ltext">
+          <strong>No urgency differentiation</strong>
+          <span>Flat queue, no priority or risk signal on any request</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">3</div>
+        <div class="ltext">
+          <strong>Requester status blindness</strong>
+          <span>Jane can't track her request in-product after submitting</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">4</div>
+        <div class="ltext">
+          <strong>Email-only notification</strong>
+          <span>No in-product update channel for either role</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">5</div>
+        <div class="ltext">
+          <strong>Approval + config disconnected</strong>
+          <span>Two steps feel collapsed — admin unsure what "approve" commits to</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb global">6</div>
+        <div class="ltext">
+          <strong>Approval fatigue (global)</strong>
+          <span>Repeated per-user decisions; no path to group-level policy</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">7</div>
+        <div class="ltext">
+          <strong>Default vs. power path collapsed</strong>
+          <span>Every approval forces 36-tool checklist regardless of admin intent</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">9</div>
+        <div class="ltext">
+          <strong>Security risk info inconsistent / buried</strong>
+          <span>Different info in each flow; "3 high risk tools" shown 3× before detail</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">11</div>
+        <div class="ltext">
+          <strong>AI client scope buried in free text</strong>
+          <span>Which clients Jane wants is hidden in prose — invisible to admin during approval</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb">12</div>
+        <div class="ltext">
+          <strong>Connector version names are meaningless</strong>
+          <span>"Linear #2" tells Jane and the admin nothing about what it's for</span>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="fb global" style="opacity:0; pointer-events:none;"></div>
+        <div class="ltext">
+          <strong style="color: var(--muted-foreground); font-weight:500;">Grey badge = global friction</strong>
+          <span>Not tied to a single step — affects the entire flow or system</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
