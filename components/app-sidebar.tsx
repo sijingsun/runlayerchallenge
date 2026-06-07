@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/lib/sidebar-context";
-import Image from "next/image";
+import Image from "@/components/img";
 import { motion, AnimatePresence } from "motion/react";
 import { UserNotificationPopover } from "@/components/user-notification-popover";
 import { NotificationPopover } from "@/components/notification-popover";

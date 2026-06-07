@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, CheckCircle2 } from "lucide-react";
-import Image from "next/image";
+import Image from "@/components/img";
 import { addRequest } from "@/lib/requests-store";
 
 const AI_CLIENTS = ["ChatGPT", "Cursor", "Claude Code", "GitHub Copilot", "Windsurf", "Gemini", "Cline", "+ Other"];

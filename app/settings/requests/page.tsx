@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/img";
 import { AnimatePresence, motion } from "motion/react";
 import { useRequests } from "@/hooks/use-requests";
 import { seedDemoRequests } from "@/lib/requests-store";

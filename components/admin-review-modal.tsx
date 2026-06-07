@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { X, AlertTriangle, Globe, ShieldCheck, Plus, Check } from "lucide-react";
-import Image from "next/image";
+import Image from "@/components/img";
 import { updateRequestStatus, markRequestSeen } from "@/lib/requests-store";
 import type { SubmittedRequest } from "@/lib/requests-store";
 

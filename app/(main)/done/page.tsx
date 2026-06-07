@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/img";
 import { Search, Plus, Globe, MessageSquare, LayoutGrid, List } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { setFromDone } from "@/lib/requests-store";

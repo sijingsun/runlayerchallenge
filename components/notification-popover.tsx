@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/img";
 import { motion, AnimatePresence } from "motion/react";
 import { Settings, ArrowRight, AlertTriangle, ChevronRight, Zap } from "lucide-react";
 import { useRequests } from "@/hooks/use-requests";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image from "@/components/img";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Search, ChevronLeft, Globe, MessageSquare, Shield, CheckCircle2 } from "lucide-react";
 

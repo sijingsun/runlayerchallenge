@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/img";
 import { useEffect, useState } from "react";
 import { isFromDone } from "@/lib/requests-store";
 import { motion, AnimatePresence } from "motion/react";

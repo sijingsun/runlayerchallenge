@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Settings } from "lucide-react";
-import Image from "next/image";
+import Image from "@/components/img";
 import Link from "next/link";
 import { useRequests } from "@/hooks/use-requests";
 

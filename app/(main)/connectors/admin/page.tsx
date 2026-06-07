@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/img";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Globe, MessageSquare, Users, Search, LayoutGrid, List, Bell, X } from "lucide-react";
