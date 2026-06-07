@@ -33,6 +33,14 @@ export function getSeenRequestIds(): Set<string> {
   return new Set(_seenIds);
 }
 
+// Timestamp set by /done — /connectors skips clearing if this is recent (< 5s)
+let _fromDoneAt: number | null = null;
+export function setFromDone(): void { _fromDoneAt = Date.now(); }
+export function isFromDone(): boolean {
+  if (_fromDoneAt === null) return false;
+  return (Date.now() - _fromDoneAt) < 5000;
+}
+
 export function getRequests(): SubmittedRequest[] {
   if (typeof window === "undefined") return [];
   try {
@@ -64,7 +72,7 @@ export function clearRequests(): void {
 
 export function seedDemoRequests(): void {
   if (typeof window === "undefined") return;
-  if (sessionStorage.getItem("admin_demo_seeded_v5")) return;
+  if (sessionStorage.getItem("admin_demo_seeded_v6")) return;
   // Clear any stale seed from previous versions
   localStorage.removeItem(STORAGE_KEY);
   sessionStorage.removeItem("admin_demo_seeded");
@@ -107,23 +115,9 @@ export function seedDemoRequests(): void {
       requestType: "new-connector",
       status: "pending-review",
     },
-    {
-      id: "demo-4",
-      connectorName: "Salesforce · Read + Write",
-      connectorIcon: "/icons/salesforce.svg",
-      clients: ["Claude Desktop"],
-      reason: "Need CRM data for account management",
-      highPriority: false,
-      submittedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
-      requesterName: "Jane Cooper",
-      requesterInitials: "JC",
-      requestType: "access",
-      status: "denied",
-      denialReason: "Salesforce access is restricted to the Revenue team only. Please request through your team lead.",
-    },
   ];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(demos));
-  sessionStorage.setItem("admin_demo_seeded_v5", "1");
+  sessionStorage.setItem("admin_demo_seeded_v6", "1");
   window.dispatchEvent(new CustomEvent(REQUESTS_EVENT));
 }
 

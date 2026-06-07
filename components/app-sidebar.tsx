@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { UserNotificationPopover } from "@/components/user-notification-popover";
 import { NotificationPopover } from "@/components/notification-popover";
 import { useRequests } from "@/hooks/use-requests";
+import { useDemoRole } from "@/hooks/use-demo-role";
 import {
   LayoutGrid,
   Layers,
@@ -114,12 +115,13 @@ function NavItem({ href, icon: Icon, label, badge, active, collapsed }: NavItemP
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const role = useDemoRole();
   const { collapsed, toggle } = useSidebar();
   const [bellOpen, setBellOpen] = useState(false);
   const [bellRect, setBellRect] = useState<DOMRect | undefined>();
   const bellRef = useRef<HTMLButtonElement>(null);
   const submittedRequests = useRequests();
-  const isAdmin = pathname.startsWith("/connectors/admin");
+  const isAdmin = role === "admin";
   const hasUnread = isAdmin
     ? submittedRequests.some(r => r.status === "pending-review" || r.status === "under-review")
     : submittedRequests.some(r => r.status === "approved" || r.status === "denied");
@@ -191,7 +193,9 @@ export function AppSidebar() {
               <ChevronDown className="h-3.5 w-3.5 ml-0.5" style={{ color: "#78716c" }} />
             </div>
           )}
-          <NavItem href="/connectors" icon={LayoutGrid} label="Connectors" collapsed={collapsed} />
+          <NavItem href={isAdmin ? "/connectors/admin" : "/connectors"} icon={LayoutGrid} label="Connectors"
+            active={pathname === "/connectors" || pathname.startsWith("/connectors/admin")}
+            collapsed={collapsed} />
           <NavItem href="/skills" icon={Layers} label="Skills" badge="Beta" collapsed={collapsed} />
           <NavItem href="/plugins" icon={Package} label="Plugins" badge="Beta" collapsed={collapsed} />
           <NavItem href="/agents" icon={Bot} label="Agents" badge="Beta" collapsed={collapsed} />

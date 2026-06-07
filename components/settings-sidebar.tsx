@@ -21,6 +21,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { useRequests } from "@/hooks/use-requests";
+import { useDemoRole } from "@/hooks/use-demo-role";
 
 interface SettingsNavItemProps {
   href: string;
@@ -72,7 +73,9 @@ const item = {
 
 export function SettingsSidebar() {
   const requests = useRequests();
-  // For the user sidebar, show count of their own requests (all statuses)
+  const role = useDemoRole();
+  const isAdmin = role === "admin";
+  const requestsHref = isAdmin ? "/settings/requests/admin" : "/settings/requests";
   const requestCount = requests.length || undefined;
 
   return (
@@ -105,9 +108,9 @@ export function SettingsSidebar() {
           </motion.p>
           <div className="space-y-0.5">
             {[
-              { href: "/settings", icon: Settings, label: "General", active: true },
+              { href: "/settings", icon: Settings, label: "General" },
               { href: "/settings/notifications-workspace", icon: Bell, label: "Notification preferences" },
-              { href: "/settings/requests", icon: AlertTriangle, label: "Requests", badge: requestCount },
+              { href: requestsHref, icon: AlertTriangle, label: "Requests", badge: requestCount },
               { href: "/settings/security-scanners", icon: ShieldOff, label: "Security scanners" },
               { href: "/settings/integrations", icon: LayoutGrid, label: "Integrations" },
               { href: "/settings/users", icon: User, label: "Users" },

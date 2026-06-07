@@ -7,7 +7,10 @@
       "mcp__plugin_figma_figma__get_design_context",
       "mcp__plugin_figma_figma__get_screenshot",
       "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git fetch *)",
+      "Bash(git -C /Users/sijingsun/Documents/Claude/Projects/runlayer-demo add -A)",
+      "Bash(git -C /Users/sijingsun/Documents/Claude/Projects/runlayer-demo status --short)"
     ]
   }
 }

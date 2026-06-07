@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { isFromDone } from "@/lib/requests-store";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Plus, Globe, MessageSquare, LayoutGrid, List } from "lucide-react";
 import { RequestNewPanel, type CatalogConnector } from "@/components/request-new-panel";
@@ -108,6 +109,15 @@ export default function ConnectorsPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [panelOpen, setPanelOpen] = useState(false);
   const [modalConnector, setModalConnector] = useState<{ name: string; icon: string } | null>(null);
+
+  // Fresh Jane landing: clear all request data unless we arrived via /done
+  useEffect(() => {
+    if (!isFromDone()) {
+      localStorage.removeItem("runlayer_requests");
+      sessionStorage.removeItem("admin_demo_seeded_v6");
+      localStorage.setItem("demo_role", "user");
+    }
+  }, []);
 
   const filteredConnectors = CONNECTORS.filter(c => {
     const matchesSearch = search === "" || c.name.toLowerCase().includes(search.toLowerCase()) || c.description.toLowerCase().includes(search.toLowerCase());

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { getRequests, REQUESTS_EVENT, type SubmittedRequest } from "@/lib/requests-store";
 
 export function useRequests(): SubmittedRequest[] {
-  const [requests, setRequests] = useState<SubmittedRequest[]>([]);
+  // Lazy init from localStorage so there's no flash of empty on first render
+  const [requests, setRequests] = useState<SubmittedRequest[]>(() => getRequests());
 
   useEffect(() => {
     setRequests(getRequests());
