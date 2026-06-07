@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Runlayer Demo
 
-## Getting Started
+An interactive product demo for **Runlayer** — a connector management platform that lets teams browse, request, and govern MCP (Model Context Protocol) server integrations.
 
-First, run the development server:
+## What it demos
+
+The app simulates two perspectives:
+
+- **User view** — Browse a catalog of hosted and local MCP connectors (Slack, Figma, GitHub, Linear, and more), request access to new ones, and track pending requests.
+- **Admin view** — Review and approve or reject connector access requests submitted by users.
+
+Key flows:
+1. User lands on the connectors page, sees their active connections.
+2. User clicks "Request new" to browse the catalog and submit an access request with justification.
+3. Admin receives a notification, opens the review modal, and approves or rejects.
+4. User sees their request status update in real time (via localStorage-backed state).
+
+## Tech stack
+
+- **Next.js** (App Router)
+- **Tailwind CSS** + shadcn/ui components
+- **Framer Motion** for page transitions and panel animations
+- **Geist** font
+
+## Running locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) — it redirects to `/connectors` by default.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To switch to the admin view, navigate to `/connectors/admin` or `/settings/requests/admin`.
